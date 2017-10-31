@@ -75,7 +75,7 @@ Page({
     })
     */
     wx.request({
-      url: 'https://www.qingchuzhang.com/index.php?mod=misc&action=data&key=index_slide&domain=' + app.globalData.subDomain,
+      url: app.globalData.domain + 'index.php?mod=misc&action=data&key=index_slide&domain=' + app.globalData.subDomain,
 
       success: function(res) {
         if (res.data.code == 200) {
@@ -92,7 +92,7 @@ Page({
       }
     })
     wx.request({
-      url: 'https://www.qingchuzhang.com/index.php?mod=shop&action=goods_types&domain='+ app.globalData.subDomain,
+      url: app.globalData.domain + 'index.php?mod=shop&action=goods_types&domain='+ app.globalData.subDomain,
       success: function(res) {
         var categories = [{id:0, name:"全部"}];
         if (res.data.code == 200) {
@@ -117,7 +117,7 @@ Page({
     console.log(categoryId)
     var that = this;
     wx.request({
-      url: 'https://www.qingchuzhang.com/index.php?mod=shop&action=goods_list&domain='+ app.globalData.subDomain,
+      url: app.globalData.domain + 'index.php?mod=shop&action=goods_list&domain='+ app.globalData.subDomain,
       data: {
         type: categoryId
       },

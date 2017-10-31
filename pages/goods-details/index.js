@@ -46,10 +46,7 @@ Page({
       } 
     })
     wx.request({
-      url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/shop/goods/detail',
-      data: {
-        id: e.id
-      },
+      url: app.globalData.domain + 'index.php?mod=shop&action=detail&id='+e.id+'&domain='+ app.globalData.subDomain,
       success: function(res) {
         var selectSizeTemp = "";
         if (res.data.data.properties) {
@@ -65,9 +62,9 @@ Page({
         that.data.goodsDetail = res.data.data;
         that.setData({
           goodsDetail:res.data.data,
-          selectSizePrice:res.data.data.basicInfo.minPrice,
-          buyNumMax:res.data.data.basicInfo.stores,
-          buyNumber:(res.data.data.basicInfo.stores>0) ? 1: 0
+          //selectSizePrice:res.data.data.basicInfo.minPrice,
+          //buyNumMax:res.data.data.basicInfo.stores,
+          //buyNumber:(res.data.data.basicInfo.stores>0) ? 1: 0
         });
         WxParse.wxParse('article', 'html', res.data.data.content, that, 5);
       }

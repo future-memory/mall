@@ -3,97 +3,85 @@ App({
   onLaunch: function () {
     var that = this;
     //  获取商城名称
-    wx.request({
-      url: 'https://www.qingchuzhang.com/index.php?mod=site&action=info&domain='+ that.globalData.subDomain,
-      data: {
-        key: 'mallName'
-      },
-      success: function(res) {
-        var code = res.data.code;
-        var data = res.data.data;
-        if (code == 200) {
-          wx.setStorageSync('mallName', data.name);
-          that.globalData.shareProfile = data.intro;
+    var mallName = wx.getStorageSync('mallName');
+    if(!mallName){
+      wx.request({
+        url: that.globalData.domain + 'index.php?mod=site&action=info&domain='+ that.globalData.subDomain,
+        data: {
+          key: 'mallName'
+        },
+        success: function(res) {
+          var code = res.data.code;
+          var data = res.data.data;
+          if (code == 200) {
+            wx.setStorageSync('mallName', data.name);
+            that.globalData.shareProfile = data.intro;
+          }
         }
-      }
-    })
-    //this.login();
+      });
+    }
+    var token = this.getToken();
+    if(!token){
+      this.login();
+    }
+  },
+  getToken: function(){
+    var data = wx.getStorageSync('authTokenInfo');
+    var timestamp = Date.parse(new Date()) / 1000; 
+
+    if (data && data.token && data.expireAt>timestamp){
+      return data.token;
+    }
   },
   login : function () {
     var that = this;
     wx.login({
-      success: function () {
-        wx.request({
-          url: 'https://www.qingchuzhang.com/index.php?mod=oauth&action=weapp_login&domain='+ that.globalData.subDomain,
-          success: function(res) {
-            if (res.data.code == 201) {
-              // 去注册
-              that.registerUser();
-              return;
-            }
-            if (res.data.code != 200) {
-              return;
-            }
-            //console.log(res.data.data.token)
-            that.globalData.token = res.data.data.token;
-          }
-        })
-      }
-    })
-  },
-  register: function () {
-    var that = this;
-    wx.login({
       success: function (res) {
-        var code = res.code; // 微信登录接口返回的 code 参数，下面注册接口需要用到
-        wx.getUserInfo({
-          success: function (res) {
-            var iv = res.iv;
-            var encryptedData = res.encryptedData;
-            // 下面开始调用注册接口
-            wx.request({
-              url: 'https://api.it120.cc/' + that.globalData.subDomain +'/user/wxapp/register/complex',
-              data: {code:code,encryptedData:encryptedData,iv:iv}, // 设置请求的 参数
-              success: (res) =>{
-                wx.hideLoading();
-                that.login();
-              }
-            })
+        var code = res.code;
+        wx.request({
+          url: that.globalData.domain + 'index.php?mod=oauth&action=weapp_login&domain='+ that.globalData.subDomain,
+          data: {code: code},
+          success: function(res) {
+            if (res.data.code == 200) {
+              //注册或更新用户名等信息
+              that.register(code);
+              return;
+            }           
           }
         })
       }
     })
   },
-  sendTempleMsg: function (orderId, trigger, template_id, form_id, page, postJsonString){
+  register: function (code) {
     var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + that.globalData.subDomain + '/template-msg/put',
-      method:'POST',
-      header: {
-        'content-type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        token: that.globalData.token,
-        type:0,
-        module:'order',
-        business_id: orderId,
-        trigger: trigger,
-        template_id: template_id,
-        form_id: form_id,
-        url:page,
-        postJsonString: postJsonString
-      },
-      success: (res) => {
-        //console.log('*********************');
-        //console.log(res.data);
-        //console.log('*********************');
-      }
-    })
+      wx.getUserInfo({
+        success: function (res) {
+          var iv = res.iv;
+          var encryptedData = res.encryptedData;
+          // 下面开始调用注册接口
+          wx.request({
+            url: that.globalData.domain + 'index.php?mod=oauth&action=weapp_reg&domain' + that.globalData.subDomain,
+            data: {code:code, encryptedData:encryptedData, iv:iv}, // 设置请求的 参数
+            success: function(res){
+              console.log(res);
+              console.log(res.data.code);
+              if(res.data.code==200){
+                that.globalData.token = res.data.data.token;
+                var a = wx.setStorageSync('authTokenInfo', res.data.data);
+                console.log(res.data.data);
+                console.log(a);
+              }
+              wx.hideLoading();
+            }
+          })
+        }
+      })
   },
   globalData:{
     userInfo: null,
     subDomain: "mall",
     version: "0.0.1",
+    domain: "https://www.qingchuzhang.com/",
     shareProfile: null // 首页转发的时候话术
   }
   // 根据自己需要修改下单时候的模板消息内容设置，可增加关闭订单、收货时候模板消息提醒
