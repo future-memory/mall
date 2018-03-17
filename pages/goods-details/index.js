@@ -56,17 +56,18 @@ Page({
           that.setData({
             hasMoreSelect:true,
             selectSize:that.data.selectSize + selectSizeTemp,
-            selectSizePrice:res.data.data.basicInfo.minPrice,
+            selectSizePrice:res.data.data.price,
           });
         }
         that.data.goodsDetail = res.data.data;
         that.setData({
-          goodsDetail:res.data.data,
-          //selectSizePrice:res.data.data.basicInfo.minPrice,
+          goodsDetail: res.data.data,
+          selectSizePrice: res.data.data.price,
+        //selectSizePrice:res.data.data.basicInfo.minPrice,
           //buyNumMax:res.data.data.basicInfo.stores,
-          //buyNumber:(res.data.data.basicInfo.stores>0) ? 1: 0
+          buyNumber: (res.data.data.count>0) ? 1 : 0
         });
-        WxParse.wxParse('article', 'html', res.data.data.content, that, 5);
+        WxParse.wxParse('article', 'html', res.data.data.remark, that, 5);
       }
     })
     this.reputation(e.id);
@@ -294,9 +295,9 @@ Page({
   bulidShopCarInfo: function () {
     // 加入购物车
     var shopCarMap = {};
-    shopCarMap.goodsId = this.data.goodsDetail.basicInfo.id;
-    shopCarMap.pic = this.data.goodsDetail.basicInfo.pic;
-    shopCarMap.name = this.data.goodsDetail.basicInfo.name;
+    shopCarMap.goodsId = this.data.goodsDetail.id;
+    shopCarMap.pic = this.data.goodsDetail.pic;
+    shopCarMap.name = this.data.goodsDetail.name;
     // shopCarMap.label=this.data.goodsDetail.basicInfo.id; 规格尺寸 
     shopCarMap.propertyChildIds = this.data.propertyChildIds;
     shopCarMap.label = this.data.propertyChildNames;
@@ -304,9 +305,9 @@ Page({
     shopCarMap.left = "";
     shopCarMap.active = true;
     shopCarMap.number = this.data.buyNumber;
-    shopCarMap.logisticsType = this.data.goodsDetail.basicInfo.logisticsId;
+    shopCarMap.logisticsType = this.data.goodsDetail.logisticsId;
     shopCarMap.logistics = this.data.goodsDetail.logistics;
-    shopCarMap.weight = this.data.goodsDetail.basicInfo.weight;
+    shopCarMap.weight = this.data.goodsDetail.weight;
 
     var shopCarInfo = this.data.shopCarInfo;
     if (!shopCarInfo.shopNum) {
